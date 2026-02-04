@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adam's Movie Watchlist</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Adam's Movie Watchlist</h1>
+            <p class="subtitle">Track movies you're excited about</p>
+            <div id="authContainer" class="auth-container">
+                <div id="loginSection" class="auth-section">
+                    <button id="googleSignIn" class="btn-google">Sign in with Google</button>
+                </div>
+                <div id="userSection" class="auth-section hidden">
+                    <span id="userEmail" class="user-email"></span>
+                    <button id="signOutBtn" class="btn-signout">Sign Out</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="upcoming">Upcoming</button>
+            <button class="tab" data-tab="watchlist">Movies to Watch</button>
+            <button class="tab" data-tab="watched">Movies Watched</button>
+            <button class="tab" data-tab="browse">Browse All</button>
+            <button class="tab" data-tab="add">Add Movie</button>
+        </div>
+
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search movies...">
+            <button id="searchBtn">Search TMDB</button>
+        </div>
+
+        <main>
+            <section id="upcoming" class="tab-content active">
+                <h2>Coming Soon</h2>
+                <div id="upcomingMovies" class="movie-grid">
+                    <p class="loading">Loading upcoming movies...</p>
+                </div>
+                <div class="load-more-container">
+                    <button id="loadMoreBtn" class="btn-load-more hidden">Load More Movies</button>
+                </div>
+            </section>
+
+            <section id="watchlist" class="tab-content">
+                <h2>Movies to Watch</h2>
+                <div id="watchlistMovies" class="movie-grid">
+                    <p class="empty-state">No movies in your watchlist yet. Add some!</p>
+                </div>
+            </section>
+
+            <section id="watched" class="tab-content">
+                <h2>Movies Watched <span id="watchedCount" class="movie-count"></span></h2>
+                <div class="alphabet-nav" id="watchedAlphabetNav"></div>
+                <div id="watchedMovies" class="movie-grid">
+                    <p class="empty-state">No movies watched yet. Mark movies as watched from your watchlist!</p>
+                </div>
+            </section>
+
+            <section id="browse" class="tab-content">
+                <h2>Browse All Movies</h2>
+                <div class="alphabet-nav" id="alphabetNav">
+                    <button class="letter-btn active" data-letter="A">A</button>
+                    <button class="letter-btn" data-letter="B">B</button>
+                    <button class="letter-btn" data-letter="C">C</button>
+                    <button class="letter-btn" data-letter="D">D</button>
+                    <button class="letter-btn" data-letter="E">E</button>
+                    <button class="letter-btn" data-letter="F">F</button>
+                    <button class="letter-btn" data-letter="G">G</button>
+                    <button class="letter-btn" data-letter="H">H</button>
+                    <button class="letter-btn" data-letter="I">I</button>
+                    <button class="letter-btn" data-letter="J">J</button>
+                    <button class="letter-btn" data-letter="K">K</button>
+                    <button class="letter-btn" data-letter="L">L</button>
+                    <button class="letter-btn" data-letter="M">M</button>
+                    <button class="letter-btn" data-letter="N">N</button>
+                    <button class="letter-btn" data-letter="O">O</button>
+                    <button class="letter-btn" data-letter="P">P</button>
+                    <button class="letter-btn" data-letter="Q">Q</button>
+                    <button class="letter-btn" data-letter="R">R</button>
+                    <button class="letter-btn" data-letter="S">S</button>
+                    <button class="letter-btn" data-letter="T">T</button>
+                    <button class="letter-btn" data-letter="U">U</button>
+                    <button class="letter-btn" data-letter="V">V</button>
+                    <button class="letter-btn" data-letter="W">W</button>
+                    <button class="letter-btn" data-letter="X">X</button>
+                    <button class="letter-btn" data-letter="Y">Y</button>
+                    <button class="letter-btn" data-letter="Z">Z</button>
+                </div>
+                <div id="browseMovies" class="movie-grid">
+                    <p class="empty-state">Select a letter to browse movies</p>
+                </div>
+                <div class="load-more-container">
+                    <button id="loadMoreBrowseBtn" class="btn-load-more hidden">Load More Movies</button>
+                </div>
+            </section>
+
+            <section id="add" class="tab-content">
+                <h2>Add Custom Movie</h2>
+                <form id="addMovieForm" class="add-form">
+                    <div class="form-group">
+                        <label for="movieTitle">Title *</label>
+                        <input type="text" id="movieTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="movieDate">Release Date *</label>
+                        <input type="date" id="movieDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="moviePoster">Poster URL (optional)</label>
+                        <input type="url" id="moviePoster" placeholder="https://...">
+                    </div>
+                    <div class="form-group">
+                        <label for="movieOverview">Description (optional)</label>
+                        <textarea id="movieOverview" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn-primary">Add to Watchlist</button>
+                </form>
+            </section>
+        </main>
+
+        <div id="searchResults" class="modal hidden">
+            <div class="modal-content">
+                <button class="close-modal">&times;</button>
+                <h2>Search Results</h2>
+                <div id="searchResultsGrid" class="movie-grid"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Data provided by <a href="https://www.themoviedb.org/" target="_blank">TMDB</a></p>
+            <p class="api-note">Note: Get a free API key from TMDB to enable movie search</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
