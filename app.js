@@ -554,6 +554,18 @@ function isOnPlex(movieTitle) {
         return true;
     }
 
+    // Try without common prefixes like "The Adventures of"
+    const prefixPatterns = [
+        /^the adventures of\s+/i,
+        /^adventures of\s+/i
+    ];
+    for (const pattern of prefixPatterns) {
+        const withoutPrefix = normalized.replace(pattern, '');
+        if (withoutPrefix !== normalized && plexLibraryTitles.has(withoutPrefix)) {
+            return true;
+        }
+    }
+
     return false;
 }
 
