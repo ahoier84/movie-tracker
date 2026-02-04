@@ -465,6 +465,10 @@ function getPlexLink(movieTitle) {
 // Roman numeral conversion for title matching
 const romanToArabic = { 'i': '1', 'ii': '2', 'iii': '3', 'iv': '4', 'v': '5', 'vi': '6', 'vii': '7', 'viii': '8', 'ix': '9', 'x': '10' };
 
+// Number word to digit conversion
+const wordToNumber = { 'one': '1', 'two': '2', 'three': '3', 'four': '4', 'five': '5', 'six': '6', 'seven': '7', 'eight': '8', 'nine': '9', 'ten': '10' };
+const numberToWord = { '1': 'one', '2': 'two', '3': 'three', '4': 'four', '5': 'five', '6': 'six', '7': 'seven', '8': 'eight', '9': 'nine', '10': 'ten' };
+
 // Normalize a title for fuzzy matching
 function normalizePlexTitle(title) {
     let t = title
@@ -476,6 +480,11 @@ function normalizePlexTitle(title) {
     // Convert Roman numerals at end of title to Arabic
     t = t.replace(/\b(i{1,3}|iv|vi{0,3}|ix|x)\b$/i, (match) => {
         return romanToArabic[match.toLowerCase()] || match;
+    });
+
+    // Convert number words to digits (e.g., "four" -> "4")
+    t = t.replace(/\b(one|two|three|four|five|six|seven|eight|nine|ten)\b/gi, (match) => {
+        return wordToNumber[match.toLowerCase()] || match;
     });
 
     return t;
