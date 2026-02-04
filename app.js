@@ -533,6 +533,18 @@ function isOnPlex(movieTitle) {
         return true;
     }
 
+    // Try with "The" prefix (e.g., "Fantastic Four" -> "The Fantastic Four")
+    const withThe = 'the ' + normalized;
+    if (plexLibraryTitles.has(withThe)) {
+        return true;
+    }
+
+    // Try without "The" prefix (e.g., "The Fantastic Four" -> "Fantastic Four")
+    const withoutThe = normalized.replace(/^the\s+/, '');
+    if (withoutThe !== normalized && plexLibraryTitles.has(withoutThe)) {
+        return true;
+    }
+
     return false;
 }
 
