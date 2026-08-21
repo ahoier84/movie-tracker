@@ -1,6 +1,17 @@
 {
   "hosting": {
     "public": ".",
+    "headers": [
+      {
+        "source": "**/*.@(html|js|css)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache"
+          }
+        ]
+      }
+    ],
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -8,5 +19,8 @@
       "package.json",
       "package-lock.json"
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

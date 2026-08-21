@@ -273,6 +273,25 @@ function setupEventListeners() {
         if (e.target === searchResultsModal) closeModal();
     });
 
+    // Movie details modal
+    const movieDetailsModal = document.getElementById('movieDetails');
+    const closeDetailsBtn = document.getElementById('closeDetailsBtn');
+    if (closeDetailsBtn) {
+        closeDetailsBtn.addEventListener('click', closeMovieDetails);
+    }
+    if (movieDetailsModal) {
+        movieDetailsModal.addEventListener('click', (e) => {
+            if (e.target === movieDetailsModal) closeMovieDetails();
+        });
+    }
+
+    // Clicking anywhere on a movie card (except its buttons/links/stars) opens details
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('button, a, .star')) return;
+        const card = e.target.closest('.movie-card');
+        if (card) openMovieDetails(Number(card.dataset.id));
+    });
+
     // Load more button
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
@@ -1217,6 +1236,84 @@ async function openTrailer(movieId) {
     }
 }
 
+// Movie Details Modal
+// ===================
+
+// Open the details modal and show the plot summary for a movie
+async function openMovieDetails(movieId) {
+    const modal = document.getElementById('movieDetails');
+    const body = document.getElementById('movieDetailsBody');
+    if (!modal || !body) return;
+
+    modal.classList.remove('hidden');
+    body.innerHTML = '<p class="loading">Loading movie details...</p>';
+
+    // Custom movies don't exist on TMDB - use the locally stored info
+    const localMovie = watchlist.find(m => m.id === movieId) || watchedList.find(m => m.id === movieId);
+    if (localMovie && localMovie.isCustom) {
+        renderMovieDetails(localMovie, body);
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `${TMDB_BASE_URL}/movie/${movieId}?api_key=${TMDB_API_KEY}&language=en-US`
+        );
+        const movie = await response.json();
+
+        if (movie.id) {
+            renderMovieDetails(movie, body);
+        } else if (localMovie) {
+            renderMovieDetails(localMovie, body);
+        } else {
+            body.innerHTML = '<p class="empty-state">No details available for this movie</p>';
+        }
+    } catch (error) {
+        console.error('Error fetching movie details:', error);
+        if (localMovie) {
+            renderMovieDetails(localMovie, body);
+        } else {
+            body.innerHTML = '<p class="empty-state">Error loading movie details</p>';
+        }
+    }
+}
+
+function renderMovieDetails(movie, container) {
+    // Custom movies store a full poster URL; TMDB movies store a path
+    const posterUrl = movie.poster_path
+        ? (movie.poster_path.startsWith('http') ? movie.poster_path : `${TMDB_IMAGE_BASE}${movie.poster_path}`)
+        : null;
+    const year = movie.release_date ? ` (${movie.release_date.split('-')[0]})` : '';
+    const genres = movie.genres && movie.genres.length > 0
+        ? movie.genres.map(g => g.name).join(', ')
+        : null;
+    const runtime = movie.runtime
+        ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
+        : null;
+    const metaParts = [formatDate(movie.release_date || 'TBA'), runtime, genres].filter(Boolean);
+
+    container.innerHTML = `
+        <div class="details-layout">
+            ${posterUrl
+                ? `<img src="${posterUrl}" alt="${movie.title}" class="details-poster">`
+                : `<div class="details-poster placeholder">🎬</div>`
+            }
+            <div class="details-info">
+                <h2>${movie.title}${year}</h2>
+                ${movie.tagline ? `<p class="details-tagline">${movie.tagline}</p>` : ''}
+                <p class="details-meta">${metaParts.join(' • ')}</p>
+                <h3>Plot Summary</h3>
+                <p class="details-overview">${movie.overview || 'No plot summary available for this movie.'}</p>
+            </div>
+        </div>
+    `;
+}
+
+function closeMovieDetails() {
+    const modal = document.getElementById('movieDetails');
+    if (modal) modal.classList.add('hidden');
+}
+
 // Make functions available globally for onclick handlers
 window.addToWatchlist = addToWatchlist;
 window.removeFromWatchlist = removeFromWatchlist;
@@ -1226,3 +1323,4 @@ window.removeFromWatched = removeFromWatched;
 window.rateMovie = rateMovie;
 window.addToWatched = addToWatched;
 window.fetchPlexLibrary = fetchPlexLibrary;
+window.openMovieDetails = openMovieDetails;

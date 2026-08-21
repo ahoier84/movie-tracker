@@ -561,6 +561,73 @@ header h1 {
     color: var(--text-primary);
 }
 
+.movie-card {
+    cursor: pointer;
+}
+
+.movie-details-content {
+    max-width: 700px;
+}
+
+.details-layout {
+    display: flex;
+    gap: 25px;
+}
+
+.details-poster {
+    width: 200px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    object-fit: cover;
+    align-self: flex-start;
+}
+
+.details-poster.placeholder {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    background: var(--bg-card-hover);
+    color: var(--text-secondary);
+}
+
+.details-info h2 {
+    margin-bottom: 8px;
+}
+
+.details-tagline {
+    font-style: italic;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.details-meta {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.details-info h3 {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.details-overview {
+    line-height: 1.6;
+}
+
+@media (max-width: 600px) {
+    .details-layout {
+        flex-direction: column;
+    }
+
+    .details-poster {
+        width: 150px;
+        margin: 0 auto;
+    }
+}
+
 .countdown {
     display: inline-block;
     background: var(--primary);
